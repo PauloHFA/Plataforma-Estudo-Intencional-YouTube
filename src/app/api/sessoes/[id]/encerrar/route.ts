@@ -33,9 +33,9 @@ export async function PATCH(
         notasCriadas: notas.length,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { erro: error.message || "Erro ao encerrar sessão" },
+      { erro: (error instanceof Error ? error.message : "") || "Erro ao encerrar sessão" },
       { status: 500 }
     );
   }

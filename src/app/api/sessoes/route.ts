@@ -55,9 +55,9 @@ export async function POST(req: Request) {
     );
 
     return NextResponse.json({ sessao }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { erro: error.message || "Erro ao iniciar sessão" },
+      { erro: (error instanceof Error ? error.message : "") || "Erro ao iniciar sessão" },
       { status: 500 }
     );
   }

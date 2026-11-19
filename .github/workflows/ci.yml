@@ -1,0 +1,37 @@
+name: IntentFlow CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  lint-typecheck-test-build:
+    name: ESLint, TypeScript, Vitest & Next Build
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint -- --quiet
+
+      - name: TypeScript Typecheck
+        run: npx tsc --noEmit
+
+      - name: Run Unit & API Tests (Vitest)
+        run: npm test
+
+      - name: Production Build
+        run: npm run build

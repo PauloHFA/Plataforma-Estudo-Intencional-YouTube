@@ -17,7 +17,7 @@ describe("duracaoIsoParaSegundos", () => {
   it("trata entradas vazias ou inválidas retornando 0", () => {
     expect(duracaoIsoParaSegundos("")).toBe(0);
     expect(duracaoIsoParaSegundos("invalido")).toBe(0);
-    expect(duracaoIsoParaSegundos(null as any)).toBe(0);
+    expect(duracaoIsoParaSegundos(null as unknown as string)).toBe(0);
   });
 });
 

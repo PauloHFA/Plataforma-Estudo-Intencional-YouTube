@@ -64,9 +64,9 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ nota, cartao: cartaoCriado }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { erro: error.message || "Erro ao criar nota" },
+      { erro: (error instanceof Error ? error.message : "") || "Erro ao criar nota" },
       { status: 500 }
     );
   }

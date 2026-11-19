@@ -177,8 +177,8 @@ export default function PainelSemanalPage() {
                         color: "#fff",
                         fontSize: "12px",
                       }}
-                      formatter={(value: any, name: any) => [
-                        `${value} min`,
+                      formatter={(value: unknown, name: unknown) => [
+                        `${value ?? 0} min`,
                         name === "minutosAssistidos" ? "Foco Real Assistido" : "Meta de Estudo",
                       ]}
                     />

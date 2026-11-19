@@ -31,9 +31,9 @@ export async function POST(
     db.registrarEventos(sessaoId, parsed.data.eventos);
 
     return NextResponse.json({ status: "ok", recebidos: parsed.data.eventos.length });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { erro: error.message || "Erro ao registrar eventos" },
+      { erro: (error instanceof Error ? error.message : "") || "Erro ao registrar eventos" },
       { status: 500 }
     );
   }

@@ -10,7 +10,7 @@ describe("YouTube Client (ytGet) e Gerenciador de Cota", () => {
   });
 
   it("retorna dados de canal mock com segurança quando sem chave configurada", async () => {
-    const dados = await ytGet<any>(
+    const dados = await ytGet<{ items: Array<{ snippet: { title: string } }> }>(
       "channels",
       { forHandle: "@GoogleDevelopers", part: "snippet,contentDetails" },
       1
@@ -22,7 +22,7 @@ describe("YouTube Client (ytGet) e Gerenciador de Cota", () => {
   });
 
   it("utiliza cache para chamadas subsequentes com os mesmos parâmetros", async () => {
-    const d1 = await ytGet<any>(
+    const d1 = await ytGet<{ items: Array<{ snippet: { title: string } }> }>(
       "channels",
       { forHandle: "@react", part: "snippet,contentDetails" },
       1
@@ -30,7 +30,7 @@ describe("YouTube Client (ytGet) e Gerenciador de Cota", () => {
     expect(d1.items[0].snippet.title).toContain("React");
 
     // Segunda chamada deve vir do cache
-    const d2 = await ytGet<any>(
+    const d2 = await ytGet<{ items: Array<{ snippet: { title: string } }> }>(
       "channels",
       { forHandle: "@react", part: "snippet,contentDetails" },
       1
@@ -39,7 +39,8 @@ describe("YouTube Client (ytGet) e Gerenciador de Cota", () => {
   });
 
   it("interrompe chamadas e previne estouro quando atinge o teto de segurança da cota", async () => {
-    const testQuota = new (youtubeQuotaManager.constructor as any)(100, 0.8); // 80 unidades de teto seguro
+    const QuotaCtor = youtubeQuotaManager.constructor as new (limite: number, teto: number) => typeof youtubeQuotaManager;
+    const testQuota = new QuotaCtor(100, 0.8); // 80 unidades de teto seguro
     await testQuota.reservar("channels", 50); // total: 50
 
     // Tentar gastar mais 40 (total seria 90 > 80)

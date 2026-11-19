@@ -1,17 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import {
   Tv,
   Plus,
-  Star,
   CheckCircle,
   AlertCircle,
-  Trash2,
-  Sparkles,
-  ExternalLink,
 } from "lucide-react";
 
 interface Canal {
@@ -38,23 +34,37 @@ export default function CanaisPage() {
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState<{ tipo: "ok" | "erro"; texto: string } | null>(null);
 
-  useEffect(() => {
-    carregarCanais();
-  }, []);
-
-  async function carregarCanais() {
+  const carregarCanais = useCallback(async () => {
     try {
       const res = await fetch("/api/canais");
       const data = await res.json();
       if (data.canais) setCanais(data.canais);
       if (data.intencoes && data.intencoes.length > 0) {
         setIntencoes(data.intencoes);
-        if (!intencaoId) setIntencaoId(data.intencoes[0].id);
+        setIntencaoId((prev) => prev || data.intencoes[0].id);
       }
     } catch (err) {
       console.error(err);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    let ativo = true;
+    fetch("/api/canais")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!ativo) return;
+        if (data.canais) setCanais(data.canais);
+        if (data.intencoes && data.intencoes.length > 0) {
+          setIntencoes(data.intencoes);
+          setIntencaoId((prev) => prev || data.intencoes[0].id);
+        }
+      })
+      .catch((err) => console.error(err));
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   async function handleAdicionarCanal(e: React.FormEvent) {
     e.preventDefault();

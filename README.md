@@ -1,4 +1,8 @@
-# ⚡ IntentFlow – Assistir com Intenção
+# ⚡ IntentFlow – Assistir com Intenção (`Plataforma-Estudo-Intencional-YouTube`)
+
+[![CI](https://github.com/PauloHFA/Plataforma-Estudo-Intencional-YouTube/actions/workflows/ci.yml/badge.svg)](https://github.com/PauloHFA/Plataforma-Estudo-Intencional-YouTube/actions/workflows/ci.yml)
+
+> Acompanhamento de pendências e backlog em [`PENDENCIAS.md`](PENDENCIAS.md).
 
 > **Um "YouTube" deliberado contra o feed infinito, desenhado para otimizar aprendizado por minuto usando a YouTube Data API v3.**
 

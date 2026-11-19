@@ -44,9 +44,9 @@ export async function POST(
       sessao: sessaoAtualizada,
       mensagem: "Vídeo substituído com sucesso preservando o orçamento.",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { erro: error.message || "Erro ao trocar item da fila" },
+      { erro: (error instanceof Error ? error.message : "") || "Erro ao trocar item da fila" },
       { status: 400 }
     );
   }

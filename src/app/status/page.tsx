@@ -15,7 +15,18 @@ import {
 } from "lucide-react";
 
 export default function StatusCotaPage() {
-  const [dados, setDados] = useState<any>(null);
+  const [dados, setDados] = useState<{
+    status?: string;
+    cota?: {
+      consumoHoje: number;
+      limiteDiario: number;
+      tetoSeguro: number;
+      porcentagemConsumida: number;
+      tetoAlcancado: boolean;
+    };
+    cache?: { entradasAtivas: number };
+    modoOfflineMock?: boolean;
+  } | null>(null);
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {

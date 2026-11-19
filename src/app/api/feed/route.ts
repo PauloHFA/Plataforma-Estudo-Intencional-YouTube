@@ -232,9 +232,9 @@ export async function GET(req: Request) {
         corGradiente: d.corGradiente,
       })),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { erro: error.message || "Erro ao obter feed de candidatos" },
+      { erro: (error instanceof Error ? error.message : "") || "Erro ao obter feed de candidatos" },
       { status: 500 }
     );
   }

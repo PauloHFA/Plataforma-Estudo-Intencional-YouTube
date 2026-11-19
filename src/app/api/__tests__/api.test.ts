@@ -58,7 +58,7 @@ describe("Rotas da API Interna do IntentFlow", () => {
     expect(data.sessao.status).toBe("em_andamento");
     // Com 35 minutos disponíveis: vid1(15m, 30) + vid2(20m, 50) = 35m, valor 80 (ótimo)
     expect(data.sessao.itens.length).toBe(2);
-    expect(data.sessao.itens.map((i: any) => i.videoId)).toEqual(
+    expect(data.sessao.itens.map((i: { videoId: string }) => i.videoId)).toEqual(
       expect.arrayContaining(["vid1", "vid2"])
     );
   });

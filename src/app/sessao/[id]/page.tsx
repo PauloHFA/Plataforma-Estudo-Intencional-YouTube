@@ -88,11 +88,18 @@ export default function SalaSessaoPage() {
   // Modal de Troca de Item (RF-05 / Seção 10)
   const [modalTrocaAberto, setModalTrocaAberto] = useState(false);
   const [itemParaTrocar, setItemParaTrocar] = useState<SessaoItem | null>(null);
-  const [candidatosDisponiveis, setCandidatosDisponiveis] = useState<any[]>([]);
+  const [candidatosDisponiveis, setCandidatosDisponiveis] = useState<Array<{
+    videoId: string;
+    titulo: string;
+    duracaoMin: number;
+    canalNome: string;
+    miniaturaUrl: string;
+    descricao?: string;
+  }>>([]);
   const [trocando, setTrocando] = useState(false);
 
   const playerRef = useRef<YouTubePlayerInstance | null>(null);
-  const bufferEventos = useRef<Array<{ videoId: string; tipo: any; posicaoS: number }>>([]);
+  const bufferEventos = useRef<Array<{ videoId: string; tipo: "play" | "pause" | "seek" | "heartbeat" | "end"; posicaoS: number }>>([]);
   const inputNotaRef = useRef<HTMLTextAreaElement | HTMLInputElement | null>(null);
 
   // Carrega dados da sessão
@@ -356,7 +363,13 @@ export default function SalaSessaoPage() {
     setModalTrocaAberto(true);
   }
 
-  async function handleConfirmarTroca(novoCandidato: any) {
+  async function handleConfirmarTroca(novoCandidato: {
+    videoId: string;
+    titulo: string;
+    duracaoMin: number;
+    canalNome: string;
+    miniaturaUrl: string;
+  }) {
     if (!itemParaTrocar) return;
     setTrocando(true);
 
@@ -511,7 +524,9 @@ export default function SalaSessaoPage() {
 
             {tipoNota === "simples" ? (
               <textarea
-                ref={inputNotaRef as any}
+                ref={(el) => {
+                  inputNotaRef.current = el;
+                }}
                 value={novaNotaTexto}
                 onChange={(e) => setNovaNotaTexto(e.target.value)}
                 placeholder="Anote um insight, fórmula ou conceito deste trecho... (Pressione N para focar)"
@@ -529,7 +544,9 @@ export default function SalaSessaoPage() {
                     Frente (Pergunta ou Conceito)
                   </label>
                   <input
-                    ref={inputNotaRef as any}
+                    ref={(el) => {
+                      inputNotaRef.current = el;
+                    }}
                     type="text"
                     value={frenteCartao}
                     onChange={(e) => setFrenteCartao(e.target.value)}
@@ -661,7 +678,7 @@ export default function SalaSessaoPage() {
               <button
                 key={i}
                 type="button"
-                onClick={() => irParaSegundo(c.segundos)}
+                onClick={() => irParaSegundo(c.tempoSegundos)}
                 className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-colors ${
                   ehTemaEscuro
                     ? "bg-slate-950/70 border-slate-800 hover:bg-slate-800"
@@ -670,7 +687,7 @@ export default function SalaSessaoPage() {
               >
                 <div className="flex items-center space-x-2.5 min-w-0 pr-2">
                   <span className="font-mono text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">
-                    {formatarSegundos(c.segundos)}
+                    {c.tempoFormatado || formatarSegundos(c.tempoSegundos)}
                   </span>
                   <span className="text-xs font-medium text-slate-300 truncate">{c.titulo}</span>
                 </div>

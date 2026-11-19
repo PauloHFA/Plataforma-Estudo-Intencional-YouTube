@@ -16,6 +16,8 @@ import {
   BrainCircuit,
 } from "lucide-react";
 
+import type { Canal, CartaoEstudo, Sessao } from "@/lib/db/types";
+
 interface MetricasSemanais {
   totalSessoes: number;
   minutosAssistidosHistorico: number;
@@ -32,9 +34,9 @@ export default function HomePage() {
     totalCartoesRevisados: 0,
     cartoesPendentesHoje: 0,
   });
-  const [canais, setCanais] = useState<any[]>([]);
-  const [cartoesPendentes, setCartoesPendentes] = useState<any[]>([]);
-  const [ultimasSessoes, setUltimasSessoes] = useState<any[]>([]);
+  const [canais, setCanais] = useState<Canal[]>([]);
+  const [cartoesPendentes, setCartoesPendentes] = useState<CartaoEstudo[]>([]);
+  const [ultimasSessoes, setUltimasSessoes] = useState<Sessao[]>([]);
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {

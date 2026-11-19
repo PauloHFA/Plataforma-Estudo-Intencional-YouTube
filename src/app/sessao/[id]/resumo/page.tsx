@@ -18,13 +18,15 @@ import {
   MessageSquare,
 } from "lucide-react";
 
+import type { Sessao, Nota } from "@/lib/db/types";
+
 export default function ResumoSessaoPage() {
   const params = useParams();
   const router = useRouter();
   const sessaoId = params?.id as string;
 
-  const [sessao, setSessao] = useState<any>(null);
-  const [notas, setNotas] = useState<any[]>([]);
+  const [sessao, setSessao] = useState<Sessao | null>(null);
+  const [notas, setNotas] = useState<Nota[]>([]);
   const [reflexao, setReflexao] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [salvo, setSalvo] = useState(false);
@@ -83,11 +85,11 @@ export default function ResumoSessaoPage() {
     );
   }
 
-  const segundosAssistidosTotal = sessao.itens.reduce(
-    (acc: number, item: any) => acc + item.segundosAssistidos,
+  const totalSegundosAssistidos = sessao.itens.reduce(
+    (acc: number, item) => acc + item.segundosAssistidos,
     0
   );
-  const minutosAssistidosReal = Math.round(segundosAssistidosTotal / 60);
+  const minutosAssistidosReal = Math.round(totalSegundosAssistidos / 60);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">

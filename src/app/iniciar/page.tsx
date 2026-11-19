@@ -1,22 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { montarFila, type CandidatoVideo } from "@/lib/algorithms/mochila";
-import { formatarSegundos } from "@/lib/algorithms/duracao";
 import {
   Clock,
-  Target,
   Play,
   Sparkles,
-  Layers,
-  ArrowRight,
   RefreshCw,
-  Sliders,
-  Check,
-  Compass,
 } from "lucide-react";
 
 interface DisciplinaCard {
@@ -35,7 +28,6 @@ export default function IniciarSessaoPage() {
   const [profundidade, setProfundidade] = useState<"todos" | "rapido" | "intermediario" | "aprofundado">("todos");
   const [disciplinas, setDisciplinas] = useState<DisciplinaCard[]>([]);
   const [candidatos, setCandidatos] = useState<CandidatoVideo[]>([]);
-  const [filaOtimizada, setFilaOtimizada] = useState<CandidatoVideo[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [iniciando, setIniciando] = useState(false);
 
@@ -60,8 +52,8 @@ export default function IniciarSessaoPage() {
         if (data.candidatos) {
           setCandidatos(data.candidatos);
         }
-        if (data.disciplinasDisponiveis && disciplinas.length === 0) {
-          setDisciplinas(data.disciplinasDisponiveis);
+        if (data.disciplinasDisponiveis) {
+          setDisciplinas((prev) => (prev.length === 0 ? data.disciplinasDisponiveis : prev));
         }
       } catch (err) {
         console.error("Erro ao carregar candidatos", err);
@@ -74,13 +66,9 @@ export default function IniciarSessaoPage() {
   }, [disciplinaAtiva, objetivo, profundidade]);
 
   // Recalcula a fila pela Mochila 0/1 sempre que os candidatos ou o tempo mudam
-  useEffect(() => {
-    if (candidatos.length > 0) {
-      const fila = montarFila(candidatos, tempoMinutos, { maxVideos: 6 });
-      setFilaOtimizada(fila);
-    } else {
-      setFilaOtimizada([]);
-    }
+  const filaOtimizada = useMemo(() => {
+    if (candidatos.length === 0) return [];
+    return montarFila(candidatos, tempoMinutos, { maxVideos: 6 });
   }, [candidatos, tempoMinutos]);
 
   const tempoTotalFila = filaOtimizada.reduce((acc, c) => acc + c.duracaoMin, 0);
@@ -145,7 +133,7 @@ export default function IniciarSessaoPage() {
             O que você quer dominar hoje?
           </h1>
           <p className="text-slate-500 text-sm sm:text-base mt-1.5 max-w-2xl">
-            Escolha uma disciplina nos cards abaixo ou digite seu tema específico (ex: <em>"Geografia"</em>, <em>"Inglês"</em>, <em>"Termodinâmica"</em>). O algoritmo da Mochila 0/1 empacota a playlist finita perfeita.
+            Escolha uma disciplina nos cards abaixo ou digite seu tema específico (ex: <em>&quot;Geografia&quot;</em>, <em>&quot;Inglês&quot;</em>, <em>&quot;Termodinâmica&quot;</em>). O algoritmo da Mochila 0/1 empacota a playlist finita perfeita.
           </p>
         </div>
 
@@ -215,7 +203,7 @@ export default function IniciarSessaoPage() {
                 className="w-full px-4 py-3.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium"
               />
               <p className="text-[11px] text-slate-400 mt-2">
-                Dica: Digite qualquer termo como <em>"geografia"</em>, <em>"relevo"</em> ou <em>"phrasal verbs"</em> para a playlist se ajustar dinamicamente.
+                Dica: Digite qualquer termo como <em>&quot;geografia&quot;</em>, <em>&quot;relevo&quot;</em> ou <em>&quot;phrasal verbs&quot;</em> para a playlist se ajustar dinamicamente.
               </p>
             </div>
 
@@ -253,16 +241,16 @@ export default function IniciarSessaoPage() {
                 Intensidade dos Vídeos
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {[
+                {([
                   { id: "todos", label: "Misto", desc: "Qualquer duração", cor: "border-slate-300" },
                   { id: "rapido", label: "⚡ Rápidos", desc: "5 a 12 min", cor: "border-emerald-300" },
                   { id: "intermediario", label: "🎯 Práticos", desc: "12 a 20 min", cor: "border-amber-300" },
                   { id: "aprofundado", label: "📚 Master", desc: "20+ min", cor: "border-indigo-300" },
-                ].map((p) => (
+                ] as const).map((p) => (
                   <button
                     key={p.id}
                     type="button"
-                    onClick={() => setProfundidade(p.id as any)}
+                    onClick={() => setProfundidade(p.id)}
                     className={`py-2 px-2.5 rounded-xl border text-left transition-all ${
                       profundidade === p.id
                         ? "bg-indigo-50 border-indigo-500 ring-2 ring-indigo-500/20 font-bold"

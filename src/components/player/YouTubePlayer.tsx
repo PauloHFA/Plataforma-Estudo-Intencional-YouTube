@@ -20,7 +20,13 @@ export interface YouTubePlayerInstance {
 
 declare global {
   interface Window {
-    YT: any;
+    YT?: {
+      Player: new (
+        el: HTMLElement | string,
+        opts: Record<string, unknown>
+      ) => YouTubePlayerInstance & { destroy?: () => void };
+      PlayerState?: { ENDED: number; PLAYING: number; PAUSED: number };
+    };
     onYouTubeIframeAPIReady: () => void;
   }
 }
@@ -66,7 +72,7 @@ export function YouTubePlayer({
   onPlayerPronto,
 }: YouTubePlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<(YouTubePlayerInstance & { destroy?: () => void }) | null>(null);
   const [usandoFallbackIframe, setUsandoFallbackIframe] = useState(false);
 
   useEffect(() => {

@@ -1,33 +1,70 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   calcularStreak,
   avaliarGamificacao,
-  XP_VALORES,
 } from "../engine";
+import type { Sessao, Nota, RevisaoHistorico } from "../../db/types";
+
+function criarSessao(parcial: Partial<Sessao> & Pick<Sessao, "id" | "status" | "inicio">): Sessao {
+  return {
+    usuarioId: "u1",
+    objetivo: "Estudo",
+    minutosPlanejados: 30,
+    itens: [],
+    ...parcial,
+  };
+}
 
 describe("Sistema de Gamificação e Aprendizado Deliberado", () => {
   it("calcula corretamente os pontos de experiência (XP)", () => {
-    const sessoesMock: any[] = [
-      {
+    const sessoesMock: Sessao[] = [
+      criarSessao({
         id: "s1",
         status: "concluida",
         inicio: "2026-10-26T10:00:00Z",
         objetivo: "Aprender inglês",
         reflexao: "Excelente sessão!",
         itens: [
-          { videoId: "v1", segundosAssistidos: 600 }, // 10 min
-          { videoId: "v2", segundosAssistidos: 600 }, // 10 min
+          {
+            id: "i1",
+            sessaoId: "s1",
+            videoId: "v1",
+            ordem: 1,
+            titulo: "V1",
+            canalNome: "Canal",
+            miniaturaUrl: "",
+            duracaoMin: 10,
+            status: "concluido",
+            segundosAssistidos: 600,
+          },
+          {
+            id: "i2",
+            sessaoId: "s1",
+            videoId: "v2",
+            ordem: 2,
+            titulo: "V2",
+            canalNome: "Canal",
+            miniaturaUrl: "",
+            duracaoMin: 10,
+            status: "concluido",
+            segundosAssistidos: 600,
+          },
         ],
+      }),
+    ];
+
+    const notasMock: Nota[] = [
+      { id: "n1", usuarioId: "u1", sessaoId: "s1", videoId: "v1", tempoS: 120, texto: "Nota 1", etiquetas: [], criadoEm: "2026-10-26T10:02:00Z" },
+      { id: "n2", usuarioId: "u1", sessaoId: "s1", videoId: "v1", tempoS: 300, texto: "Nota 2", etiquetas: [], criadoEm: "2026-10-26T10:05:00Z" },
+    ];
+
+    const revisoesMock: RevisaoHistorico[] = [
+      {
+        id: "r1",
+        cartaoId: "c1",
+        qualidade: 5,
+        revisadoEm: "2026-10-26T10:10:00Z",
       },
-    ];
-
-    const notasMock: any[] = [
-      { id: "n1", tempoS: 120, texto: "Nota 1" },
-      { id: "n2", tempoS: 300, texto: "Nota 2" },
-    ];
-
-    const revisoesMock: any[] = [
-      { id: "r1", qualidade: 5 },
     ];
 
     const perfil = avaliarGamificacao({
@@ -36,35 +73,55 @@ describe("Sistema de Gamificação e Aprendizado Deliberado", () => {
       revisoes: revisoesMock,
     });
 
-    // 20 min * 10 XP = 200
-    // 1 sessao concluida = 50
-    // 2 notas * 20 = 40
-    // 1 revisao * 15 = 15
-    // 1 reflexao = 75
-    // Total = 380 XP
     expect(perfil.xpTotal).toBe(380);
-    expect(perfil.nivelAtual).toBe(2); // Nível 2 começa em 250 XP
+    expect(perfil.nivelAtual).toBe(2);
     expect(perfil.nivelTitulo).toBe("Explorador Focado");
   });
 
   it("desbloqueia os emblemas correspondentes ao atingir as metas", () => {
-    const sessoesMock: any[] = [
-      {
+    const sessoesMock: Sessao[] = [
+      criarSessao({
         id: "s1",
         status: "concluida",
         inicio: "2026-10-26T10:00:00Z",
         objetivo: "Inglês para viagens",
         reflexao: "Reflexão 1",
-        itens: [{ videoId: "v1", segundosAssistidos: 3600 }], // 60 min
-      },
-      {
+        itens: [
+          {
+            id: "i1",
+            sessaoId: "s1",
+            videoId: "v1",
+            ordem: 1,
+            titulo: "V1",
+            canalNome: "Canal",
+            miniaturaUrl: "",
+            duracaoMin: 60,
+            status: "concluido",
+            segundosAssistidos: 3600,
+          },
+        ],
+      }),
+      criarSessao({
         id: "s2",
         status: "concluida",
         inicio: "2026-10-26T14:00:00Z",
         objetivo: "Inglês profissional",
         reflexao: "Reflexão 2",
-        itens: [{ videoId: "v2", segundosAssistidos: 600 }],
-      },
+        itens: [
+          {
+            id: "i2",
+            sessaoId: "s2",
+            videoId: "v2",
+            ordem: 1,
+            titulo: "V2",
+            canalNome: "Canal",
+            miniaturaUrl: "",
+            duracaoMin: 10,
+            status: "concluido",
+            segundosAssistidos: 600,
+          },
+        ],
+      }),
     ];
 
     const perfil = avaliarGamificacao({
@@ -85,14 +142,20 @@ describe("Sistema de Gamificação e Aprendizado Deliberado", () => {
   });
 
   it("calcula streak diário consecutivo de estudo", () => {
-    const sessoesConcluidas: any[] = [
-      { id: "s1", status: "concluida", inicio: "2026-10-26T10:00:00Z", itens: [] },
-      { id: "s2", status: "concluida", inicio: "2026-10-25T10:00:00Z", itens: [] },
-      { id: "s3", status: "concluida", inicio: "2026-10-24T10:00:00Z", itens: [] },
-    ];
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-26T15:00:00Z"));
+    try {
+      const sessoesConcluidas: Sessao[] = [
+        criarSessao({ id: "s1", status: "concluida", inicio: "2026-10-26T10:00:00Z" }),
+        criarSessao({ id: "s2", status: "concluida", inicio: "2026-10-25T10:00:00Z" }),
+        criarSessao({ id: "s3", status: "concluida", inicio: "2026-10-24T10:00:00Z" }),
+      ];
 
-    const streak = calcularStreak(sessoesConcluidas);
-    expect(streak).toBe(3);
+      const streak = calcularStreak(sessoesConcluidas);
+      expect(streak).toBe(3);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

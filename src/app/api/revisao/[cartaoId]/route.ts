@@ -51,9 +51,9 @@ export async function POST(
       cartao: persistido,
       mensagem: "Revisão computada com sucesso pelo algoritmo SM-2",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { erro: error.message || "Erro ao registrar revisão" },
+      { erro: (error instanceof Error ? error.message : "") || "Erro ao registrar revisão" },
       { status: 500 }
     );
   }

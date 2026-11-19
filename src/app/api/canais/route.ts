@@ -27,8 +27,8 @@ export async function POST(req: Request) {
       );
     }
 
-    let { identificador, intencaoId, prioridade } = parsed.data;
-    identificador = identificador.trim();
+    const { intencaoId, prioridade } = parsed.data;
+    let identificador = parsed.data.identificador.trim();
 
     // Se for URL, extrai o handle ou channel id
     if (identificador.includes("youtube.com/")) {
@@ -92,9 +92,9 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ canal: canalCriado }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { erro: error.message || "Erro ao adicionar canal" },
+      { erro: (error instanceof Error ? error.message : "") || "Erro ao adicionar canal" },
       { status: 500 }
     );
   }
